@@ -1,16 +1,14 @@
-import { FC } from "react";
-import { Summary as SummaryType } from "../types";
+import { FC, useContext } from "react";
 import Summary from "./Summary";
+import { SummaryContext } from "./Popup";
 
-type SummaryListProps = {
-	summaries: SummaryType[];
-};
+const SummaryList: FC = () => {
+	const { summaries } = useContext(SummaryContext);
 
-const SummaryList: FC<SummaryListProps> = ({ summaries }) => {
 	return (
 		<div>
 			{summaries.map((summary) => (
-				<Summary key={summary.id} id={summary.id}>
+				<Summary key={summary._id} id={summary._id}>
 					{summary.data}
 				</Summary>
 			))}

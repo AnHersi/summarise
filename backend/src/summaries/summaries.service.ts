@@ -18,6 +18,10 @@ export class SummariesService {
     return summaries;
   }
 
+  async deleteSummary(id): Promise<void> {
+    await this.summaryModel.deleteOne({ _id: id }).exec();
+  }
+
   createSummary(message: string): Observable<Promise<SummaryText>> {
     const requestBody = {
       model: 'gpt-3.5-turbo',

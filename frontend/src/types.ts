@@ -1,5 +1,5 @@
 export type Summary = {
-	id: string;
+	_id: string;
 	highlight: string;
 	data: string;
 };
