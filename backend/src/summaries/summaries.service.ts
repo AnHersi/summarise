@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Observable, map } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { Model } from 'mongoose';
-import { Summary } from './summaries.schema';
+import { Summary, SummaryText } from './summaries.schema';
 
 @Injectable()
 export class SummariesService {
@@ -18,7 +18,7 @@ export class SummariesService {
     return summaries;
   }
 
-  createSummary(message: string): Observable<Promise<{ summary: string }>> {
+  createSummary(message: string): Observable<Promise<SummaryText>> {
     const requestBody = {
       model: 'gpt-3.5-turbo',
       messages: [{ role: 'user', content: 'Summarize shortly ' + message }],

@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { SummariesService } from './summaries.service';
 import { Observable } from 'rxjs';
-import { Summary } from './summaries.schema';
+import { Summary, SummaryText } from './summaries.schema';
 
 @Controller('summary')
 export class SummariesController {
@@ -9,12 +9,14 @@ export class SummariesController {
 
   @Get()
   async getAllSummaries(): Promise<Summary[]> {
-    const summaries = this.summariesService.getAllSummaries();
+    const summaries = await this.summariesService.getAllSummaries();
     return summaries;
   }
 
   @Post()
-  createSummary(@Body('message') message: string): Observable<any> {
+  createSummary(
+    @Body('message') message: string,
+  ): Observable<Promise<SummaryText>> {
     return this.summariesService.createSummary(message);
   }
 }

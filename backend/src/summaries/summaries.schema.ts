@@ -1,6 +1,12 @@
 import * as mongoose from 'mongoose';
 
 export interface Summary {
+  id: string;
+  highlight: string;
+  data: string;
+}
+
+export interface SummaryText {
   summary: string;
 }
 
