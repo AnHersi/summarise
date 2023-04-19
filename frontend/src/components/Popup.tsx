@@ -14,15 +14,14 @@ export const SummaryContext = createContext<SummaryContextType>({
 	summaries: [],
 	setSummaries: () => {},
 });
+
 const Popup: FC = () => {
 	const [enabled, setEnabled] = useState<boolean>(true);
 	const [summaries, setSummaries] = useState<Summary[]>([]);
 
 	const getSummaries = (): void => {
 		axios.get("http://localhost:8080/summary/all").then((res) => {
-			const summaryArray = res.data;
-			console.log(summaryArray);
-			setSummaries(summaryArray);
+			setSummaries(res.data);
 		});
 	};
 
