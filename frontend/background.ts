@@ -1,6 +1,3 @@
-// Replace this with your OpenAI API key
-const OPENAI_API_KEY = "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";
-
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 	console.log("The background has received a message", message);
 	switch (message.type) {

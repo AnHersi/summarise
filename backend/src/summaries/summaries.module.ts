@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 import { SummariesController } from './summaries.controller';
 import { SummariesService } from './summaries.service';
+import { SummariesSchema } from './summaries.schema';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
@@ -10,6 +12,7 @@ import { ConfigModule } from '@nestjs/config';
       isGlobal: true,
     }),
     HttpModule,
+    MongooseModule.forFeature([{ name: 'Summary', schema: SummariesSchema }]),
   ],
   controllers: [SummariesController],
   providers: [SummariesService],
