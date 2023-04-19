@@ -1,0 +1,29 @@
+{
+	"manifest_version": 3,
+
+	"name": "Summarise",
+	"description": "This Chrome extension built with React, NestJS, and TypeScript, integrates the OpenAI API to help users generate brief summaries of articles or webpages by highlighting text",
+	"version": "1.0.0",
+
+	"action": {
+		"default_popup": "index.html",
+		"default_title": "Summarise",
+		"default_icon": {
+			"128": "src/assets/logo.png"
+		}
+	},
+
+	"background": {
+		"service_worker": "background.ts"
+	},
+
+	"content_scripts": [
+		{
+			"matches": ["<all_urls>"],
+			"js": ["content.tsx"],
+			"run_at": "document_start"
+		}
+	],
+
+	"permissions": ["tabs", "scripting", "storage"]
+}
