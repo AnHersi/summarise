@@ -1,3 +1,4 @@
+// Import required modules
 import { FC } from "react";
 import { LoadingSpinner, SpinnerText } from "./styles/Spinner";
 import { TooltipWrapper } from "./styles/TooltipWrapper";

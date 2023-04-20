@@ -1,3 +1,4 @@
+// Import required modules
 import { FC, useState, useEffect, createContext, SetStateAction, Dispatch } from "react";
 import Logo from "../assets/logo.png";
 import SummaryList from "./SummaryList";
@@ -10,6 +11,7 @@ interface SummaryContextType {
 	setSummaries: Dispatch<SetStateAction<Summary[]>>;
 }
 
+// Setup summary context
 export const SummaryContext = createContext<SummaryContextType>({
 	summaries: [],
 	setSummaries: () => {},
@@ -19,12 +21,14 @@ const Popup: FC = () => {
 	const [enabled, setEnabled] = useState<boolean>(true);
 	const [summaries, setSummaries] = useState<Summary[]>([]);
 
+	// Make request to server to get all summaries
 	const getSummaries = (): void => {
 		axios.get("http://localhost:8080/summary/all").then((res) => {
 			setSummaries(res.data);
 		});
 	};
 
+	// Handle toggling of extension
 	const handleToggle = (): void => {
 		chrome.runtime.sendMessage({
 			type: enabled ? "DISABLE" : "ENABLE",
@@ -32,7 +36,8 @@ const Popup: FC = () => {
 		setEnabled(!enabled);
 	};
 
-	useEffect(() => {
+	// Get summaries and store enabled state
+	useEffect((): void => {
 		getSummaries();
 		chrome.storage.sync.get(["disabled"], (result) => {
 			result.disabled ? setEnabled(false) : setEnabled(true);

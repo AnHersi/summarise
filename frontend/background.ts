@@ -1,3 +1,4 @@
+// Add listener for incoming messages
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 	switch (message.type) {
 		case "ADD_SUMMARY":
@@ -18,6 +19,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 	}
 });
 
+// Make a request to the server to create a summary
 const createSummary = (message: string, sendResponse: (data: any) => void) => {
 	return fetch("http://localhost:8080/summary", {
 		method: "POST",
@@ -39,6 +41,7 @@ const createSummary = (message: string, sendResponse: (data: any) => void) => {
 		});
 };
 
+// Make a request to the server to get all summaries
 const getAllSummaries = (sendResponse: (data: any) => void) => {
 	return fetch("http://localhost:8080/summary/all", {
 		method: "GET",

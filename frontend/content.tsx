@@ -1,7 +1,9 @@
+// Import required modules
 import Tooltip from "./src/components/Tooltip";
 import { createRoot } from "react-dom/client";
 import { Summary } from "./src/types";
 
+// Initialise the container div
 const initialiseContainer = (): HTMLDivElement => {
 	const container = document.createElement("div");
 	Object.assign(container.style, {
@@ -14,6 +16,7 @@ const initialiseContainer = (): HTMLDivElement => {
 	return container;
 };
 
+// Initialise the highlight span
 const initialiseHighlightSpan = (): HTMLSpanElement => {
 	const span = document.createElement("span");
 	Object.assign(span.style, {
@@ -23,6 +26,7 @@ const initialiseHighlightSpan = (): HTMLSpanElement => {
 	return span;
 };
 
+// Send a message to the service worker to add a new summary
 const addSummary = (text: string): Promise<string> => {
 	try {
 		const response = new Promise<string>((resolve) =>
@@ -30,11 +34,12 @@ const addSummary = (text: string): Promise<string> => {
 		);
 		return response;
 	} catch (error) {
-		console.error("Error sending message to background script", error);
+		console.error("Error sending message to service worker", error);
 		throw new Error();
 	}
 };
 
+// Get all summaries from the service worker
 const getAllSummaries = (): Promise<Summary[]> => {
 	try {
 		const response = new Promise<Summary[]>((resolve) =>
@@ -42,11 +47,12 @@ const getAllSummaries = (): Promise<Summary[]> => {
 		);
 		return response;
 	} catch (error) {
-		console.error("Error sending message to background script", error);
+		console.error("Error sending message to service worker", error);
 		throw new Error();
 	}
 };
 
+// Handle highlight click event
 const handleHighlightClick = async (
 	event: MouseEvent,
 	span: HTMLSpanElement,
@@ -59,11 +65,59 @@ const handleHighlightClick = async (
 	const response = await getAllSummaries();
 	const summary = response.find((summary: Summary) => summary.highlight === span.innerText);
 	if (summary) {
-		console.log(summary);
 		root.render(<Tooltip text={summary.data} />);
 	}
 };
 
+// Handle page loading
+const handlePageLoad = async (): Promise<void> => {
+	chrome.storage.sync.set({ reload: false });
+
+	attachMouseupListener(container);
+	attachMousedownListener();
+
+	const allSummaries = await getAllSummaries();
+
+	allSummaries.forEach((summary) => {
+		const highlightText = summary.highlight.trim();
+		if (highlightText.length > 0) {
+			const regex = new RegExp(highlightText, "gi");
+
+			const textNodes: Text[] = [];
+			const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+
+			// Find all text nodes containing the highlight text
+			while (walker.nextNode()) {
+				const node = walker.currentNode as Text;
+				if (node.wholeText.trim().includes(highlightText)) {
+					textNodes.push(node);
+				}
+			}
+
+			// Wrap the highlight text inside a span element
+			textNodes.forEach((node) => {
+				const wrapper = document.createElement("span");
+				wrapper.innerHTML = node.wholeText.replace(
+					regex,
+					`<span class="highlight" style="background-color: #7d5cd1; color: white">${highlightText}</span>`
+				);
+				if (node.parentElement) {
+					node.parentElement.replaceChild(wrapper, node);
+				}
+			});
+
+			// Attach mouseup event listener to each highlight span
+			const highlightSpans: NodeListOf<HTMLSpanElement> = document.querySelectorAll(".highlight");
+			highlightSpans.forEach((span: HTMLSpanElement) => {
+				span.addEventListener("mouseup", (event: MouseEvent) => {
+					handleHighlightClick(event, span, span.getBoundingClientRect());
+				});
+			});
+		}
+	});
+};
+
+// Toggle the tooltip
 const toggleTooltip = (): void => {
 	const tooltip = document.getElementById("tooltip");
 	tooltip?.style.display === "none"
@@ -71,11 +125,13 @@ const toggleTooltip = (): void => {
 		: tooltip?.style.setProperty("display", "none");
 };
 
+// Attach mouseup event listener
 const attachMouseupListener = (container: HTMLDivElement): void => {
 	let currentSummary = "";
 	document.addEventListener("mouseup", async (event) => {
 		const selectedText = window.getSelection()?.toString();
 
+		// Configure the toolip for the selected text
 		if (selectedText && selectedText.length > 1 && !selectedText.includes("\n")) {
 			const range = window.getSelection()?.getRangeAt(0);
 			const rect = range?.getBoundingClientRect() as DOMRect;
@@ -94,71 +150,38 @@ const attachMouseupListener = (container: HTMLDivElement): void => {
 			window.getSelection()?.empty();
 
 			const response = await addSummary(selectedText);
-			console.log(response);
 			currentSummary = response;
 			root.render(<Tooltip text={currentSummary} />);
 		}
 	});
 };
 
+// Attach mouseup event listener
 const attachMousedownListener = (): void => {
+	// Hide the tooltip when the mouse is clicked
 	document.addEventListener("mousedown", () => {
 		const tooltip = document.getElementById("tooltip");
 		tooltip?.style.setProperty("display", "none");
 	});
 };
 
+// Attach span event listener
 const attachSpanEventListener = (span: HTMLSpanElement, callback: () => void): void => {
 	span.addEventListener("mouseup", callback);
 };
 
+// Setup container and root for tooltip
 const container = initialiseContainer();
 const root = createRoot(container);
 
+// Reload window on storage change
 chrome.storage.onChanged.addListener(() => {
 	window.location.reload();
 });
 
+// Setup page on page load
 chrome.storage.sync.get(["disabled"]).then(async (result) => {
 	if (!result.disabled) {
-		console.log(result.disabled);
-		attachMouseupListener(container);
-		attachMousedownListener();
-
-		const allSummaries = await getAllSummaries();
-
-		allSummaries.forEach((summary) => {
-			const highlightText = summary.highlight.trim();
-			if (highlightText.length > 0) {
-				const regex = new RegExp(highlightText, "gi");
-
-				const textNodes: Text[] = [];
-				const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
-				while (walker.nextNode()) {
-					const node = walker.currentNode as Text;
-					if (node.wholeText.trim().includes(highlightText)) {
-						textNodes.push(node);
-					}
-				}
-
-				textNodes.forEach((node) => {
-					const wrapper = document.createElement("span");
-					wrapper.innerHTML = node.wholeText.replace(
-						regex,
-						`<span class="highlight" style="background-color: #7d5cd1; color: white">${highlightText}</span>`
-					);
-					if (node.parentElement) {
-						node.parentElement.replaceChild(wrapper, node);
-					}
-				});
-
-				const highlightSpans: NodeListOf<HTMLSpanElement> = document.querySelectorAll(".highlight");
-				highlightSpans.forEach((span: HTMLSpanElement) => {
-					span.addEventListener("mouseup", (event: MouseEvent) => {
-						handleHighlightClick(event, span, span.getBoundingClientRect());
-					});
-				});
-			}
-		});
+		await handlePageLoad();
 	}
 });

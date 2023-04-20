@@ -1,3 +1,4 @@
+// Import required modules
 import { FC, useContext } from "react";
 import Summary from "./Summary";
 import { SummaryContext } from "./Popup";
@@ -15,6 +16,7 @@ const SummaryList: FC = () => {
 						{summary.data}
 					</Summary>
 				))}
+
 			{!summaries.length && (
 				<span className="flex justify-center items-center w-full h-16 text-gray-500 text-lg">
 					No summaries found

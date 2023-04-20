@@ -1,8 +1,9 @@
+// Import required modules
 import { ReactNode, FC, useState, useEffect, useContext } from "react";
 import { IconCopy, IconBin, IconTick } from "../assets/icons";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import axios from "axios";
 import { SummaryContext } from "./Popup";
+import axios from "axios";
 
 type SummaryProps = {
 	children: ReactNode;
@@ -14,11 +15,14 @@ const Summary: FC<SummaryProps> = ({ children, id }) => {
 
 	const { summaries, setSummaries } = useContext(SummaryContext);
 
+	// Handle deletion of a summary and update chrome storage
 	const handleDelete = (id: string): void => {
 		axios.delete(`http://localhost:8080/summary/${id}`);
 		setSummaries(summaries.filter((summary) => summary._id !== id));
+		chrome.storage.sync.set({ reload: true });
 	};
 
+	// Handle display of icon when copied
 	useEffect(() => {
 		setTimeout(() => {
 			setCopied(false);
@@ -38,6 +42,7 @@ const Summary: FC<SummaryProps> = ({ children, id }) => {
 
 				<IconBin className="cursor-pointer w-5 h-5 mx-2" onClick={() => handleDelete(id)} />
 			</div>
+
 			<div className="flex ">
 				<div className="w-[15px] min-h-full mx-3 rounded bg-[#a074ff]">&nbsp;</div>
 				{children}
