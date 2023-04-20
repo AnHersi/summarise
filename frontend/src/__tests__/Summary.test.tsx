@@ -29,8 +29,6 @@ describe("Summary", () => {
 
 	(global as any).chrome = mockChrome;
 
-	const setSummaries = jest.fn();
-
 	beforeEach(() => {
 		render(<Summary id={summaries[0]._id}>{summaries[0].data}</Summary>);
 	});
@@ -53,6 +51,6 @@ describe("Summary", () => {
 	test("clicking delete button removes summary", () => {
 		const deleteButton = screen.getByLabelText("delete");
 		fireEvent.click(deleteButton);
-		expect(chrome.storage.sync.set).toHaveBeenCalled();
+		expect(chrome.storage.sync.set).toHaveBeenCalledWith({ reload: true });
 	});
 });
