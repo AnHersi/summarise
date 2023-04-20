@@ -1,11 +1,19 @@
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-	console.log("The background has received a message", message);
 	switch (message.type) {
 		case "ADD_SUMMARY":
 			createSummary(message.data, sendResponse);
 			return true;
 		case "GET_SUMMARIES":
 			getAllSummaries(sendResponse);
+			return true;
+		case "DISABLE":
+			chrome.action.setBadgeBackgroundColor({ color: [119, 119, 119, 255] });
+			chrome.action.setBadgeText({ text: "Off" });
+			chrome.storage.sync.set({ disabled: true });
+			return true;
+		case "ENABLE":
+			chrome.action.setBadgeText({ text: "" });
+			chrome.storage.sync.set({ disabled: false });
 			return true;
 	}
 });
@@ -24,7 +32,6 @@ const createSummary = (message: string, sendResponse: (data: any) => void) => {
 			return response.json();
 		})
 		.then((data) => {
-			// console.log(data);
 			sendResponse(data.summary);
 		})
 		.catch((error) => {
@@ -40,7 +47,6 @@ const getAllSummaries = (sendResponse: (data: any) => void) => {
 			return response.json();
 		})
 		.then((data) => {
-			// console.log(data);
 			sendResponse(data);
 		})
 		.catch((error) => {

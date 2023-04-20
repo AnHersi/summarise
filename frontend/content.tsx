@@ -115,46 +115,50 @@ const attachSpanEventListener = (span: HTMLSpanElement, callback: () => void): v
 const container = initialiseContainer();
 const root = createRoot(container);
 
-attachMouseupListener(container);
-attachMousedownListener();
+chrome.storage.onChanged.addListener(() => {
+	window.location.reload();
+});
 
-const allSummaries = await getAllSummaries();
+chrome.storage.sync.get(["disabled"]).then(async (result) => {
+	if (!result.disabled) {
+		console.log(result.disabled);
+		attachMouseupListener(container);
+		attachMousedownListener();
 
-console.log(allSummaries);
+		const allSummaries = await getAllSummaries();
 
-allSummaries.forEach((summary) => {
-	const highlightText = summary.highlight.trim();
-	if (highlightText.length > 0) {
-		const regex = new RegExp(highlightText, "gi");
+		allSummaries.forEach((summary) => {
+			const highlightText = summary.highlight.trim();
+			if (highlightText.length > 0) {
+				const regex = new RegExp(highlightText, "gi");
 
-		// Find all text nodes that match the highlight text
-		const textNodes: Text[] = [];
-		const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
-		while (walker.nextNode()) {
-			const node = walker.currentNode as Text;
-			if (regex.test(node.wholeText.trim())) {
-				textNodes.push(node);
+				const textNodes: Text[] = [];
+				const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+				while (walker.nextNode()) {
+					const node = walker.currentNode as Text;
+					if (node.wholeText.trim().includes(highlightText)) {
+						textNodes.push(node);
+					}
+				}
+
+				textNodes.forEach((node) => {
+					const wrapper = document.createElement("span");
+					wrapper.innerHTML = node.wholeText.replace(
+						regex,
+						`<span class="highlight" style="background-color: #7d5cd1; color: white">${highlightText}</span>`
+					);
+					if (node.parentElement) {
+						node.parentElement.replaceChild(wrapper, node);
+					}
+				});
+
+				const highlightSpans: NodeListOf<HTMLSpanElement> = document.querySelectorAll(".highlight");
+				highlightSpans.forEach((span: HTMLSpanElement) => {
+					span.addEventListener("mouseup", (event: MouseEvent) => {
+						handleHighlightClick(event, span, span.getBoundingClientRect());
+					});
+				});
 			}
-		}
-
-		// Replace each matching text node with a highlighted element
-		textNodes.forEach((node) => {
-			const wrapper = document.createElement("span");
-			wrapper.innerHTML = node.wholeText.replace(
-				regex,
-				`<span class="highlight" style="background-color: #7d5cd1; color: white">${highlightText}</span>`
-			);
-			if (node.parentElement) {
-				node.parentElement.replaceChild(wrapper, node);
-			}
-		});
-
-		// Add event listener to each highlighted element
-		const highlightSpans: NodeListOf<HTMLSpanElement> = document.querySelectorAll(".highlight");
-		highlightSpans.forEach((span: HTMLSpanElement) => {
-			span.addEventListener("mouseup", (event: MouseEvent) => {
-				handleHighlightClick(event, span, span.getBoundingClientRect());
-			});
 		});
 	}
 });

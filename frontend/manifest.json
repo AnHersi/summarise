@@ -25,5 +25,5 @@
 		}
 	],
 
-	"permissions": ["tabs", "scripting", "storage"]
+	"permissions": ["tabs", "management", "storage", "browserAction"]
 }
