@@ -34,13 +34,17 @@ const Summary: FC<SummaryProps> = ({ children, id }) => {
 			<div className="flex justify-end items-center mb-3">
 				<CopyToClipboard text={String(children)} onCopy={() => setCopied(true)}>
 					{!copied ? (
-						<IconCopy className="cursor-pointer w-5 h-5" />
+						<IconCopy aria-label="copy" className="cursor-pointer w-5 h-5" />
 					) : (
-						<IconTick className="cursor-pointer w-5 h-5" />
+						<IconTick aria-label="tick" className="cursor-pointer w-5 h-5" />
 					)}
 				</CopyToClipboard>
 
-				<IconBin className="cursor-pointer w-5 h-5 mx-2" onClick={() => handleDelete(id)} />
+				<IconBin
+					aria-label="delete"
+					className="cursor-pointer w-5 h-5 mx-2"
+					onClick={() => handleDelete(id)}
+				/>
 			</div>
 
 			<div className="flex ">

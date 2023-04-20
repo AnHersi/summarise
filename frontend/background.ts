@@ -8,11 +8,13 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 			getAllSummaries(sendResponse);
 			return true;
 		case "DISABLE":
+			console.log("disabled");
 			chrome.action.setBadgeBackgroundColor({ color: [119, 119, 119, 255] });
 			chrome.action.setBadgeText({ text: "Off" });
 			chrome.storage.sync.set({ disabled: true });
 			return true;
 		case "ENABLE":
+			console.log("enabled");
 			chrome.action.setBadgeText({ text: "" });
 			chrome.storage.sync.set({ disabled: false });
 			return true;

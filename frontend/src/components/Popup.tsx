@@ -22,10 +22,13 @@ const Popup: FC = () => {
 	const [summaries, setSummaries] = useState<Summary[]>([]);
 
 	// Make request to server to get all summaries
-	const getSummaries = (): void => {
-		axios.get("http://localhost:8080/summary/all").then((res) => {
-			setSummaries(res.data);
-		});
+	const getSummaries = async (): Promise<void> => {
+		try {
+			const response = await axios.get("http://localhost:8080/summary/all");
+			response ? setSummaries(response.data) : null;
+		} catch (error) {
+			console.error(error);
+		}
 	};
 
 	// Handle toggling of extension
