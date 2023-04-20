@@ -1,10 +1,10 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { Summary, SummaryText, DeleteResult } from './summaries.schema';
 import { Observable, map } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { Model } from 'mongoose';
-import { Summary, SummaryText } from './summaries.schema';
 
 @Injectable()
 export class SummariesService {
@@ -18,8 +18,9 @@ export class SummariesService {
     return summaries;
   }
 
-  async deleteSummary(id): Promise<void> {
-    await this.summaryModel.deleteOne({ _id: id }).exec();
+  async deleteSummary(id): Promise<DeleteResult> {
+    const result = await this.summaryModel.deleteOne({ _id: id }).exec();
+    return result;
   }
 
   createSummary(message: string): Observable<Promise<SummaryText>> {
