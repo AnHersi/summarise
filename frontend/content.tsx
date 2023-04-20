@@ -52,16 +52,15 @@ const handleHighlightClick = async (
 	span: HTMLSpanElement,
 	rect: DOMRect
 ): Promise<void> => {
+	container.style.top = `${event.pageY - span.offsetHeight - 40}px`;
+	container.style.left = `${rect.left}px`;
 	root.render(<Tooltip text={""} />);
 	toggleTooltip();
 	const response = await getAllSummaries();
-	const summaries = response;
-	const summary = summaries.find((summary: any) => summary.highlight === span.innerText);
-	console.log(summary);
+	const summary = response.find((summary: Summary) => summary.highlight === span.innerText);
 	if (summary) {
+		console.log(summary);
 		root.render(<Tooltip text={summary.data} />);
-		container.style.top = `${event.pageY - span.offsetHeight - 40}px`;
-		container.style.left = `${rect.left}px`;
 	}
 };
 
@@ -91,6 +90,9 @@ const attachMouseupListener = (container: HTMLDivElement): void => {
 				handleHighlightClick(event, span, rect);
 			});
 
+			root.render(<Tooltip text={""} />);
+			window.getSelection()?.empty();
+
 			const response = await addSummary(selectedText);
 			console.log(response);
 			currentSummary = response;
@@ -115,3 +117,44 @@ const root = createRoot(container);
 
 attachMouseupListener(container);
 attachMousedownListener();
+
+const allSummaries = await getAllSummaries();
+
+console.log(allSummaries);
+
+allSummaries.forEach((summary) => {
+	const highlightText = summary.highlight.trim();
+	if (highlightText.length > 0) {
+		const regex = new RegExp(highlightText, "gi");
+
+		// Find all text nodes that match the highlight text
+		const textNodes: Text[] = [];
+		const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+		while (walker.nextNode()) {
+			const node = walker.currentNode as Text;
+			if (regex.test(node.wholeText.trim())) {
+				textNodes.push(node);
+			}
+		}
+
+		// Replace each matching text node with a highlighted element
+		textNodes.forEach((node) => {
+			const wrapper = document.createElement("span");
+			wrapper.innerHTML = node.wholeText.replace(
+				regex,
+				`<span class="highlight" style="background-color: #7d5cd1; color: white">${highlightText}</span>`
+			);
+			if (node.parentElement) {
+				node.parentElement.replaceChild(wrapper, node);
+			}
+		});
+
+		// Add event listener to each highlighted element
+		const highlightSpans: NodeListOf<HTMLSpanElement> = document.querySelectorAll(".highlight");
+		highlightSpans.forEach((span: HTMLSpanElement) => {
+			span.addEventListener("mouseup", (event: MouseEvent) => {
+				handleHighlightClick(event, span, span.getBoundingClientRect());
+			});
+		});
+	}
+});

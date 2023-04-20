@@ -4,7 +4,7 @@ export const TooltipWrapper = styled.div`
 	display: flex;
 	align-items: center;
 	padding: 4px 8px;
-	max-width: 700px;
+	max-width: 40rem;
 	border-radius: 4px;
 	box-shadow: 0px 0px 11px rgba(0, 0, 0, 0.29);
 	background-color: rgba(255, 255, 255, 0.95);
